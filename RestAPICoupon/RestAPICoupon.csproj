@@ -155,12 +155,32 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\CouponActionsController.cs" />
+    <Compile Include="Controllers\CouponsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="DTOs\ApplicableCouponResult.cs" />
+    <Compile Include="DTOs\ApplicableCouponsRequest.cs" />
+    <Compile Include="DTOs\ApplicableCouponsResponse.cs" />
+    <Compile Include="DTOs\ApplyCouponRequest.cs" />
+    <Compile Include="DTOs\ApplyCouponResponse.cs" />
+    <Compile Include="DTOs\CouponCreateRequest.cs" />
+    <Compile Include="DTOs\CouponUpdateRequest.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Cart.cs" />
+    <Compile Include="Models\CartItem.cs" />
+    <Compile Include="Models\Coupon.cs" />
+    <Compile Include="Models\CouponInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\CouponRepository.cs" />
+    <Compile Include="Services\BxGyStrategy.cs" />
+    <Compile Include="Services\CartWiseStrategy.cs" />
+    <Compile Include="Services\CouponDetails.cs" />
+    <Compile Include="Services\CouponStrategyFactory.cs" />
+    <Compile Include="Services\ICouponStrategy.cs" />
+    <Compile Include="Services\ProductWiseStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
@@ -215,7 +235,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
