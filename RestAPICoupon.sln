@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33328.57
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestAPICoupon", "RestAPICoupon\RestAPICoupon.csproj", "{18DB2DEB-483D-4A89-BE00-5DB01BC40A1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestAPICoupon.Tests", "RestAPICoupon.Tests\RestAPICoupon.Tests.csproj", "{644D89AF-25D3-4D65-8A86-A55D41D67A4C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{18DB2DEB-483D-4A89-BE00-5DB01BC40A1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18DB2DEB-483D-4A89-BE00-5DB01BC40A1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18DB2DEB-483D-4A89-BE00-5DB01BC40A1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18DB2DEB-483D-4A89-BE00-5DB01BC40A1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{644D89AF-25D3-4D65-8A86-A55D41D67A4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{644D89AF-25D3-4D65-8A86-A55D41D67A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{644D89AF-25D3-4D65-8A86-A55D41D67A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{644D89AF-25D3-4D65-8A86-A55D41D67A4C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B8F31A41-4C12-473D-997B-A3458FB28EC2}
+	EndGlobalSection
+EndGlobal
