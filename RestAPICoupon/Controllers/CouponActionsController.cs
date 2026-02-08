@@ -19,14 +19,19 @@ namespace RestAPICoupon.Controllers
         public IHttpActionResult Applicable([FromBody] ApplicableCouponsRequest req)
         {
             if (req == null || req.Cart == null)
+            {
                 return BadRequest("Cart is required.");
+            }
 
             var results = new List<ApplicableCouponResult>();
 
             // Evaluate each active coupon against the cart
             foreach (var c in _repo.GetAll())
             {
-                if (!IsCouponActive(c)) continue;
+                if (!IsCouponActive(c))
+                {
+                    continue;
+                }
 
                 var strategy = _factory.Get(c.Type);
                 if (strategy.IsApplicable(c, req.Cart))
@@ -53,15 +58,28 @@ namespace RestAPICoupon.Controllers
         public IHttpActionResult Apply(int id, [FromBody] ApplyCouponRequest req)
         {
             if (req == null || req.Cart == null)
+            {
                 return BadRequest("Cart is required.");
+            }
 
             var c = _repo.GetById(id);
-            if (c == null) return NotFound();
-            if (!IsCouponActive(c)) return BadRequest("Coupon is inactive or expired.");
+
+            if (c == null)
+            {
+                return NotFound();
+            }
+
+            if (!IsCouponActive(c))
+            {
+                return BadRequest("Coupon is inactive or expired.");
+            }
 
             var strategy = _factory.Get(c.Type);
+
             if (!strategy.IsApplicable(c, req.Cart))
+            {
                 return BadRequest("Coupon not applicable for this cart.");
+            }
 
             // Apply coupon and compute totals
             var updated = strategy.Apply(c, req.Cart);
@@ -78,25 +96,40 @@ namespace RestAPICoupon.Controllers
             return Ok(response);
         }
 
-        // Determines if coupon is active based on flags and dates
+        /// <summary>
+        /// Determines if coupon is active based on flags and dates
+        /// </summary>
+        /// <param name="c">Coupon</param>
+        /// <returns>true if coupon active else false</returns>
         private bool IsCouponActive(Coupon c)
         {
-            if (!c.IsActive) return false;
+            if (!c.IsActive)
+            {
+                return false;
+            }
 
             // Assume dates are stored in UTC
             var now = DateTime.UtcNow;
 
             if (c.StartDate.HasValue && c.StartDate.Value > now)
+            {
                 return false;
+            }
 
             if (c.EndDate.HasValue && c.EndDate.Value < now)
+            {
                 return false;
+            }
 
             // Note: MaxRedemptions logic is not enforced yet
             return true;
         }
 
-        // Calculates cart totals based on item price, quantity, and per-item discount
+        /// <summary>
+        /// Calculates cart totals based on item price, quantity, and per-item discount
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns>Cart totals</returns>
         private (decimal TotalPrice, decimal TotalDiscount, decimal FinalPrice) CalculateTotals(Cart cart)
         {
             var totalPrice = cart.Items.Sum(i => i.Price * i.Quantity);

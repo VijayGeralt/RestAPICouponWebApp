@@ -93,7 +93,9 @@ namespace RestAPICoupon.Services
 
             // If repetition limit <= 0, treat as unlimited
             if (d.RepetitionLimit > 0)
+            {
                 sets = Math.Min(sets, d.RepetitionLimit);
+            }
 
             return Math.Max(sets, 0);
         }

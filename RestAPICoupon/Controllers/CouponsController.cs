@@ -17,8 +17,15 @@ namespace RestAPICoupon.Controllers
         [HttpPost, Route("")]
         public IHttpActionResult Create([FromBody] CouponCreateRequest req)
         {
-            if (req == null) return BadRequest("Invalid request body.");
-            if (string.IsNullOrWhiteSpace(req.Code)) return BadRequest("Code is required.");
+            if (req == null)
+            {
+                return BadRequest("Invalid request body.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.Code))
+            {
+                return BadRequest("Code is required.");
+            }
 
             // Map request to domain model
             var coupon = new Coupon
@@ -45,7 +52,11 @@ namespace RestAPICoupon.Controllers
         public IHttpActionResult GetById(int id)
         {
             var c = _repo.GetById(id);
-            if (c == null) return NotFound();
+            if (c == null)
+            { 
+                return NotFound(); 
+            }
+
             return Ok(c);
         }
 
@@ -56,7 +67,10 @@ namespace RestAPICoupon.Controllers
             if (req == null) return BadRequest("Invalid request body.");
 
             var existing = _repo.GetById(id);
-            if (existing == null) return NotFound();
+            if (existing == null)
+            {
+                return NotFound();
+            }
 
             // Update mutable fields
             existing.Code = req.Code;
@@ -73,7 +87,11 @@ namespace RestAPICoupon.Controllers
         public IHttpActionResult Delete(int id)
         {
             var deleted = _repo.Delete(id);
-            if (!deleted) return NotFound();
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
             return Ok(new { deleted });
         }
     }
