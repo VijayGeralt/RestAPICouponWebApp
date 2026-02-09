@@ -49,7 +49,7 @@ namespace RestAPICoupon.Controllers
             try
             {
                 var id = _repo.Create(coupon);
-                return Ok(new { id });
+                return Ok<object>(new { id });
             }
             catch (SqlException ex)
             {
@@ -110,7 +110,7 @@ namespace RestAPICoupon.Controllers
             try
             {
                 var updated = _repo.Update(existing);
-                return Ok(new { updated });
+                return Ok<object>(new { updated });
             }
             catch (SqlException ex)
             {
@@ -134,7 +134,7 @@ namespace RestAPICoupon.Controllers
                     return NotFound();
                 }
 
-                return Ok(new { deleted });
+                return Ok<object>(new { deleted });
             }
             catch (SqlException ex)
             {
