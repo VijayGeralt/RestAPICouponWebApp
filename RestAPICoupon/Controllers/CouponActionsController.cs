@@ -9,6 +9,9 @@ using RestAPICoupon.Services;
 
 namespace RestAPICoupon.Controllers
 {
+    /// <summary>
+    /// Coupon actions
+    /// </summary>
     public class CouponActionsController : ApiController
     {
         private readonly CouponRepository _repo = new CouponRepository();
@@ -23,34 +26,46 @@ namespace RestAPICoupon.Controllers
                 return BadRequest("Cart is required.");
             }
 
-            var results = new List<ApplicableCouponResult>();
-
-            // Evaluate each active coupon against the cart
-            foreach (var c in _repo.GetAll())
+            try
             {
-                if (!IsCouponActive(c))
-                {
-                    continue;
-                }
+                var results = new List<ApplicableCouponResult>();
 
-                var strategy = _factory.Get(c.Type);
-                if (strategy.IsApplicable(c, req.Cart))
+                // Evaluate each active coupon against the cart
+                foreach (var c in _repo.GetAll())
                 {
-                    results.Add(new ApplicableCouponResult
+                    if (!IsCouponActive(c))
                     {
-                        CouponId = c.Id,
-                        Type = c.Type,
-                        Discount = strategy.CalculateDiscount(c, req.Cart)
-                    });
+                        continue;
+                    }
+
+                    if (!CouponDetailsValidator.TryValidate(c.Type, c.DetailsJson, out var error))
+                    {
+                        return BadRequest($"Coupon {c.Id} configuration invalid: {error}");
+                    }
+
+                    var strategy = _factory.Get(c.Type);
+                    if (strategy.IsApplicable(c, req.Cart))
+                    {
+                        results.Add(new ApplicableCouponResult
+                        {
+                            CouponId = c.Id,
+                            Type = c.Type,
+                            Discount = strategy.CalculateDiscount(c, req.Cart)
+                        });
+                    }
                 }
+
+                var response = new ApplicableCouponsResponse
+                {
+                    ApplicableCoupons = results
+                };
+
+                return Ok(response);
             }
-
-            var response = new ApplicableCouponsResponse
+            catch (Exception ex)
             {
-                ApplicableCoupons = results
-            };
-
-            return Ok(response);
+                return InternalServerError(ex);
+            }
         }
 
         // POST /apply-coupon/{id}
@@ -74,26 +89,46 @@ namespace RestAPICoupon.Controllers
                 return BadRequest("Coupon is inactive or expired.");
             }
 
-            var strategy = _factory.Get(c.Type);
-
-            if (!strategy.IsApplicable(c, req.Cart))
+            if (!CouponDetailsValidator.TryValidate(c.Type, c.DetailsJson, out var error))
             {
-                return BadRequest("Coupon not applicable for this cart.");
+                return BadRequest($"Coupon configuration invalid: {error}");
             }
 
-            // Apply coupon and compute totals
-            var updated = strategy.Apply(c, req.Cart);
-            var totals = CalculateTotals(updated);
-
-            var response = new ApplyCouponResponse
+            try
             {
-                UpdatedCart = updated,
-                TotalPrice = totals.TotalPrice,
-                TotalDiscount = totals.TotalDiscount,
-                FinalPrice = totals.FinalPrice
-            };
+                var strategy = _factory.Get(c.Type);
 
-            return Ok(response);
+                if (!strategy.IsApplicable(c, req.Cart))
+                {
+                    return BadRequest("Coupon not applicable for this cart.");
+                }
+
+                // Apply coupon and compute totals
+                var updated = strategy.Apply(c, req.Cart);
+
+                // Increment redemption count (and deactivate if limit reached)
+                var updatedRedemption = _repo.IncrementRedemptionsAndDeactivateIfNeeded(c.Id);
+                if (!updatedRedemption)
+                {
+                    return BadRequest("Coupon redemption limit reached.");
+                }
+
+                var totals = CalculateTotals(updated);
+
+                var response = new ApplyCouponResponse
+                {
+                    UpdatedCart = updated,
+                    TotalPrice = totals.TotalPrice,
+                    TotalDiscount = totals.TotalDiscount,
+                    FinalPrice = totals.FinalPrice
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         /// <summary>
@@ -121,7 +156,11 @@ namespace RestAPICoupon.Controllers
                 return false;
             }
 
-            // Note: MaxRedemptions logic is not enforced yet
+            if (c.MaxRedemptions.HasValue && c.CurrentRedemptions >= c.MaxRedemptions.Value)
+            {
+                return false;
+            }
+            
             return true;
         }
 

@@ -3,6 +3,9 @@ using RestAPICoupon.Models;
 
 namespace RestAPICoupon.Services
 {
+    /// <summary>
+    /// Coupon strategy structure
+    /// </summary>
     public interface ICouponStrategy
     {
         // True if coupon can be applied to this cart

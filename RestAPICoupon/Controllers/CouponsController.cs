@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Http;
 using RestAPICoupon.DTOs;
 using RestAPICoupon.Models;
 using RestAPICoupon.Repositories;
+using RestAPICoupon.Services;
 
 namespace RestAPICoupon.Controllers
 {
@@ -27,17 +29,36 @@ namespace RestAPICoupon.Controllers
                 return BadRequest("Code is required.");
             }
 
+            if (!ValidateCommonFields(req.Type, req.DetailsJson, req.StartDate, req.EndDate, req.MaxRedemptions, out var error))
+            {
+                return BadRequest(error);
+            }
+
             // Map request to domain model
             var coupon = new Coupon
             {
                 Code = req.Code,
                 Type = req.Type,
                 DetailsJson = req.DetailsJson,
-                IsActive = true
+                IsActive = req.IsActive ?? true,
+                StartDate = req.StartDate,
+                EndDate = req.EndDate,
+                MaxRedemptions = req.MaxRedemptions
             };
 
-            var id = _repo.Create(coupon);
-            return Ok(new { id });
+            try
+            {
+                var id = _repo.Create(coupon);
+                return Ok(new { id });
+            }
+            catch (SqlException ex)
+            {
+                return InternalServerError(ex);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // GET /coupons
@@ -72,27 +93,87 @@ namespace RestAPICoupon.Controllers
                 return NotFound();
             }
 
+            if (!ValidateCommonFields(req.Type, req.DetailsJson, req.StartDate, req.EndDate, req.MaxRedemptions, out var error))
+            {
+                return BadRequest(error);
+            }
+
             // Update mutable fields
             existing.Code = req.Code;
             existing.Type = req.Type;
             existing.DetailsJson = req.DetailsJson;
             existing.IsActive = req.IsActive;
+            existing.StartDate = req.StartDate;
+            existing.EndDate = req.EndDate;
+            existing.MaxRedemptions = req.MaxRedemptions;
 
-            var updated = _repo.Update(existing);
-            return Ok(new { updated });
+            try
+            {
+                var updated = _repo.Update(existing);
+                return Ok(new { updated });
+            }
+            catch (SqlException ex)
+            {
+                return InternalServerError(ex);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // DELETE /coupons/{id}
         [HttpDelete, Route("{id:int}")]
         public IHttpActionResult Delete(int id)
         {
-            var deleted = _repo.Delete(id);
-            if (!deleted)
+            try
             {
-                return NotFound();
+                var deleted = _repo.Delete(id);
+                if (!deleted)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new { deleted });
+            }
+            catch (SqlException ex)
+            {
+                return InternalServerError(ex);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // Validates common fields and DetailsJson
+        private bool ValidateCommonFields(
+            CouponType type,
+            string detailsJson,
+            DateTime? startDate,
+            DateTime? endDate,
+            int? maxRedemptions,
+            out string error)
+        {
+            if (!CouponDetailsValidator.TryValidate(type, detailsJson, out error))
+            {
+                return false;
             }
 
-            return Ok(new { deleted });
+            if (startDate.HasValue && endDate.HasValue && startDate.Value > endDate.Value)
+            {
+                error = "StartDate must be before EndDate.";
+                return false;
+            }
+
+            if (maxRedemptions.HasValue && maxRedemptions.Value <= 0)
+            {
+                error = "MaxRedemptions must be greater than 0.";
+                return false;
+            }
+
+            error = null;
+            return true;
         }
     }
 }

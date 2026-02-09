@@ -14,16 +14,23 @@ namespace RestAPICoupon.Services
 
             var total = cart.Items.Sum(i => i.Price * i.Quantity);
             if (d.MinCartTotal.HasValue && total < d.MinCartTotal.Value)
+            {
                 return false;
+            }
 
             var sets = CalculateEligibleSets(cart, d);
-            if (sets <= 0) return false;
+            if (sets <= 0)
+            {
+                return false;
+            }
 
             // Ensure we have pricing for all get products
             foreach (var gp in d.GetProducts)
             {
                 if (!cart.Items.Any(i => i.ProductId == gp.ProductId))
+                {
                     return false;
+                }
             }
 
             return true;
@@ -34,13 +41,19 @@ namespace RestAPICoupon.Services
         {
             var d = JsonConvert.DeserializeObject<BxGyDetails>(coupon.DetailsJson);
             var sets = CalculateEligibleSets(cart, d);
-            if (sets <= 0) return 0m;
+            if (sets <= 0)
+            {
+                return 0m;
+            }
 
             decimal discount = 0m;
             foreach (var gp in d.GetProducts)
             {
                 var item = cart.Items.FirstOrDefault(i => i.ProductId == gp.ProductId);
-                if (item == null) continue;
+                if (item == null)
+                {
+                    continue;
+                }
 
                 var freeQty = gp.Quantity * sets;
                 discount += freeQty * item.Price;
@@ -54,12 +67,18 @@ namespace RestAPICoupon.Services
         {
             var d = JsonConvert.DeserializeObject<BxGyDetails>(coupon.DetailsJson);
             var sets = CalculateEligibleSets(cart, d);
-            if (sets <= 0) return cart;
+            if (sets <= 0)
+            {
+                return cart;
+            }
 
             foreach (var gp in d.GetProducts)
             {
                 var item = cart.Items.FirstOrDefault(i => i.ProductId == gp.ProductId);
-                if (item == null) continue;
+                if (item == null)
+                {
+                    continue;
+                }
 
                 var freeQty = gp.Quantity * sets;
 
@@ -77,7 +96,9 @@ namespace RestAPICoupon.Services
         private int CalculateEligibleSets(Cart cart, BxGyDetails d)
         {
             if (d.BuyProducts == null || d.BuyProducts.Count == 0)
+            {
                 return 0;
+            }
 
             int sets = int.MaxValue;
 
@@ -85,7 +106,9 @@ namespace RestAPICoupon.Services
             {
                 var item = cart.Items.FirstOrDefault(i => i.ProductId == bp.ProductId);
                 if (item == null || item.Quantity < bp.Quantity)
+                {
                     return 0;
+                }
 
                 var possible = item.Quantity / bp.Quantity;
                 sets = Math.Min(sets, possible);

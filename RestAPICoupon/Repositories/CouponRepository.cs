@@ -151,5 +151,30 @@ namespace RestAPICoupon.Repositories
                 return cmd.ExecuteNonQuery() > 0;
             }
         }
+
+        public bool IncrementRedemptionsAndDeactivateIfNeeded(int id)
+        {
+            const string sql = @"
+                                UPDATE dbo.Coupons
+                                SET CurrentRedemptions = CurrentRedemptions + 1,
+                                    IsActive = CASE 
+                                        WHEN MaxRedemptions IS NOT NULL AND CurrentRedemptions + 1 >= MaxRedemptions THEN 0 
+                                        ELSE IsActive 
+                                    END,
+                                    UpdatedAt = SYSUTCDATETIME()
+                                WHERE Id = @Id
+                                  AND IsActive = 1
+                                  AND (MaxRedemptions IS NULL OR CurrentRedemptions < MaxRedemptions);";
+
+            using (var conn = new SqlConnection(_cs))
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                conn.Open();
+
+                // true if current redemptions updated successfully, else false
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
     }
 }

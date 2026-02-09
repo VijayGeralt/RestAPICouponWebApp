@@ -178,6 +178,7 @@
     <Compile Include="Services\BxGyStrategy.cs" />
     <Compile Include="Services\CartWiseStrategy.cs" />
     <Compile Include="Services\CouponDetails.cs" />
+    <Compile Include="Services\CouponDetailsValidator.cs" />
     <Compile Include="Services\CouponStrategyFactory.cs" />
     <Compile Include="Services\ICouponStrategy.cs" />
     <Compile Include="Services\ProductWiseStrategy.cs" />

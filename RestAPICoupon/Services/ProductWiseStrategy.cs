@@ -5,6 +5,9 @@ using RestAPICoupon.Models;
 
 namespace RestAPICoupon.Services
 {
+    /// <summary>
+    /// Product wise coupon strategy
+    /// </summary>
     public class ProductWiseStrategy : ICouponStrategy
     {
         // Applicable if target product exists and min cart total (if any) is met
@@ -14,7 +17,10 @@ namespace RestAPICoupon.Services
 
             var total = cart.Items.Sum(i => i.Price * i.Quantity);
             if (d.MinCartTotal.HasValue && total < d.MinCartTotal.Value)
+            {
                 return false;
+            }
+                
 
             return cart.Items.Any(i => i.ProductId == d.ProductId);
         }
@@ -28,7 +34,9 @@ namespace RestAPICoupon.Services
 
             var discount = (item.Price * item.Quantity) * (d.DiscountPercent / 100m);
             if (d.MaxDiscount.HasValue)
+            {
                 discount = Math.Min(discount, d.MaxDiscount.Value);
+            }
 
             return Math.Round(discount, 2);
         }
@@ -38,7 +46,10 @@ namespace RestAPICoupon.Services
         {
             var d = JsonConvert.DeserializeObject<ProductWiseDetails>(coupon.DetailsJson);
             var item = cart.Items.FirstOrDefault(i => i.ProductId == d.ProductId);
-            if (item == null) return cart;
+            if (item == null)
+            {
+                return cart;
+            }
 
             var discount = CalculateDiscount(coupon, cart);
             item.TotalDiscount += discount;
