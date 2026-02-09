@@ -13,11 +13,15 @@ namespace RestAPICoupon
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Route root URL to the API Help page
             routes.MapRoute(
-                name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
+                name: "RootHelp",
+                url: "",
+                defaults: new { controller = "Help", action = "Index" },
+                namespaces: new[] { "RestAPICoupon.Areas.HelpPage.Controllers" }
+            ).DataTokens = new RouteValueDictionary(new { area = "HelpPage" });
+
+            // Default MVC route removed (API-only + HelpPage area)
         }
     }
 }
